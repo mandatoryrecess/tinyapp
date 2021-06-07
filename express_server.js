@@ -17,14 +17,20 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
 //URLS 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase}; 
   res.render("urls_index", templateVars)
+});
+
+//URLS SHOW 
+app.get("/urls/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  const templateVars = { shortURL: shortURL, longURL: longURL};
+  console.log(longURL)
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
