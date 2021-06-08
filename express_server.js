@@ -44,6 +44,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);        
 });
 
+//u/:shortURL 
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL; 
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log(shortURL)
+  console.log(longURL)
+  res.redirect(longURL);
+})
+
+
 //URLS SHOW 
 app.get("/urls/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
@@ -53,14 +63,6 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 
-//u/:shortURL 
-app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL; 
-  const longURL = urlDatabase[req.params.shortURL];
-  console.log(shortURL)
-  console.log(urlDatabase)
-  res.redirect(longURL);
-})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
