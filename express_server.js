@@ -30,6 +30,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+///EDIT 
+app.post("/urls/:shortURL", (req, res) => {
+  const longURL = req.body.longURL; 
+  const shortURL = req.params.shortURL; 
+  urlDatabase[shortURL] = `http://${longURL}`; 
+  res.redirect(`/urls/${shortURL}`);
+});
+
 //URLS INDEX
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
