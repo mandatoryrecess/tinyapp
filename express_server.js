@@ -4,6 +4,14 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
+var morgan = require('morgan')
+
+//middleware 
+
+app.use(morgan('dev'))
+app.get('/', function (req, res) {
+  res.send('hello, world!')
+})
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -30,8 +38,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const longURL = req.body.longURL; 
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);        
 });
 
 //URLS SHOW 
@@ -39,9 +49,18 @@ app.get("/urls/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   const shortURL = req.params.shortURL;
   const templateVars = { shortURL: shortURL, longURL: longURL};
-  console.log(longURL)
   res.render("urls_show", templateVars);
 });
+
+
+//u/:shortURL 
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL; 
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log(shortURL)
+  console.log(urlDatabase)
+  res.redirect(longURL);
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
