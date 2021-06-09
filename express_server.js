@@ -35,7 +35,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/login", (req, res) => {
   let username = req.body.username
   console.log(username)
-
+  res.cookie('username', username)
   res.redirect(`/urls`)
 })
 
@@ -50,7 +50,6 @@ app.post("/urls/:shortURL", (req, res) => {
 //URLS INDEX
 app.get("/urls", (req, res) => {
   const username = req.body.username
-  console.log(username)
   const templateVars = { urls: urlDatabase, username: req.body.username };
   res.render("urls_index", templateVars);
 });
