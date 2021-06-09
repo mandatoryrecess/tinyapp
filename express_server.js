@@ -5,9 +5,10 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 var morgan = require("morgan");
+var cookieParser = require('cookie-parser')
 
 //middleware
-
+app.use(cookieParser())
 app.use(morgan("dev"));
 app.get("/", function (req, res) {
   res.send("hello, world!");
@@ -30,6 +31,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+//LOGIN POST
+app.post("/login", (req, res) => {
+  let username = req.body.username
+  console.log(username)
+
+  res.redirect(`/urls`)
+})
+
 ///EDIT 
 app.post("/urls/:shortURL", (req, res) => {
   const longURL = req.body.longURL; 
@@ -40,7 +49,9 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //URLS INDEX
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const username = req.body.username
+  console.log(username)
+  const templateVars = { urls: urlDatabase, username: req.body.username };
   res.render("urls_index", templateVars);
 });
 
