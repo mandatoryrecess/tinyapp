@@ -8,15 +8,20 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        
-      <form class= "text-left navbar-left" action='/logout' method="POST">
-          <input class="btn btn-danger" type="submit" value="Log Out" >
-      </form>
+      </div>
+      
+      
       <% if(!user) { %>
         <% } else { %>
-          <h5 class="navbar-brand navbar-left">Welcome! </h5>           
-          <h3> <%= user.email  %></h3>      
+          <span class="nav justify-content-end nav-item" style =" padding-left:15px; color:rgb(198, 227, 10)">Hello, </span>           
+          <span style =" padding-left:5px; color:rgb(198, 227, 10)"> <%= user.email  %></span>      
         <% } %>
+        <span class="nav justify-content-end nav-item" style =" padding-left:5px; color:rgb(198, 227, 10)">:)</span> 
+
+        <form class= "text-left navbar-left nav-item" action='/logout' method="POST" style ="padding-left:15px;">
+          <input class="btn btn-danger" type="submit" value="Log Out" >
+      </form>
+       
     </div>
   </nav>
 </header>
