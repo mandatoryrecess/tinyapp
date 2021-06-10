@@ -8,12 +8,13 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-      <form class= "text-left" action='/logout' method="POST">
+        
+      <form class= "text-left navbar-left" action='/logout' method="POST">
           <input class="btn btn-danger" type="submit" value="Log Out" >
       </form>
       <% if(!user) { %>
         <% } else { %>
-          <h5 class="navbar-brand">Welcome! </h5>           
+          <h5 class="navbar-brand navbar-left">Welcome! </h5>           
           <h3> <%= user.email  %></h3>      
         <% } %>
     </div>
