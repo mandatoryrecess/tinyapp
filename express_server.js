@@ -84,8 +84,7 @@ app.post("/urls/:shortURL", (req, res) => {
   } else {
     urlDatabase[shortURL].longURL = `http://${longURL}`;
   }
-  
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect(`/urls`);;
 });
 
 app.post("/urls", (req, res) => {
@@ -119,7 +118,11 @@ app.post("/logout", (req, res) => {
 
 //////////////////GET
 app.get("/", function (req, res) {
-  res.redirect("/urls");
+  const userId = req.session["id"];
+  if(userId) {
+    return res.redirect("/urls")
+  }
+  res.redirect("/login");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -131,6 +134,11 @@ app.get("/urls", (req, res) => {
   const urls = urlsForUser(urlDatabase, userID);
   const user = userDatabase[userID];
   const templateVars = { urls, user };
+
+  if(!userID) {
+    return res.render("urls_error_login", templateVars)
+  }
+
   res.render("urls_index", templateVars);
 });
 
@@ -145,13 +153,17 @@ app.get("/urls/new", (req, res) => {
   const userId = req.session["id"];
   const user = userDatabase[userId];
   const templateVars = { urls: urlDatabase, user };
+  if(!userId) {
+    return res.render("login", templateVars)
+  }
+
   res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL]['longURL'];
-
+  
   if (longURL.includes("http://")) {
    return res.redirect(`${longURL}`);
 }
@@ -161,9 +173,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session["id"];
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  
   const shortURL = req.params.shortURL;
-
   const templateVars = {
     urls: urlDatabase,
     userid: userDatabase[userId],
@@ -171,13 +181,13 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL,
     user: userId,
   };
-
   const urlBelongToUser =
     urlDatabase[shortURL] && urlDatabase[shortURL].userID === userId;
 
   if (!urlBelongToUser) {
     return res.render("urls_error_url", templateVars);
   }
+
   if (!userId) {
     return res.render("urls_error_login", templateVars);
   }
