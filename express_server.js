@@ -55,7 +55,6 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-
 app.post("/urls", (req, res) => {
   let user = {}; 
   const longURL = req.body.longURL;
@@ -76,11 +75,22 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   let id = generateRandomString();
 
-  userDatabase[id] = { id, email, password,};
+  if (findUserByEmail(email)) {
+    res.status(401).send("We have found your email in the database");
+  } else if (emptyFormRejection(email, password) === false) {
+     res.status(401).send("wrong credentials!");
+  }
+
+  userDatabase[id] = { id, email, password};
   req.session["id"] = id;
   res.redirect(`/urls/`);
 });
 
+app.post("/logout", (req, res) => {
+  let id = req.session["email"];
+  req.session = null;
+  res.redirect(`/register`);
+});
 
 //////////////////GET 
 app.get("/", function (req, res) {
@@ -131,6 +141,11 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const userId = req.session["id"];
+  const templateVars = { urls: urlDatabase, user: {} };
+  res.render("login", templateVars);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -142,3 +157,19 @@ function generateRandomString() {
   const randomString = Math.random().toString(36).substring(2, 8);
   return randomString;
 }
+
+const emptyFormRejection = (email, password) => {
+  if (!email || !password) {
+    return false;
+  }
+};
+
+const findUserByEmail = function (email, userDatabase) {
+  for (let userID in userDatabase) {
+    const user = userDatabase[userID];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
