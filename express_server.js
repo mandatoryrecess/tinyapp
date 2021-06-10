@@ -42,8 +42,20 @@ const userDatabase = {
 ////////////////POST 
 
 app.post("/login", (req, res) => {
-  let username = req.body.username
-  console.log(username)
+  let email = req.body.email;
+  let password = req.body.password;
+  console.log("email", email)
+  const user = findUserByEmail(email, userDatabase);
+  console.log('user', user)
+
+  // if (!user) {
+  //   return res.status(403).send("wrong credentials!");
+  // }
+  // if (!bcrypt.compareSync(password, user.password)) {
+  //   return res.status(403).send("wrong password");
+  // }
+  
+  req.session["id"] = user.id;
   
   res.redirect(`/urls`)
 })
