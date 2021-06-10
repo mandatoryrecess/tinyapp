@@ -20,10 +20,9 @@ app.use(
 
 //URL database
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "user2RandomID" },
 };
-
 //USER database
 const userDatabase = {
   "7474": {
@@ -63,16 +62,26 @@ app.post("/login", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const longURL = req.body.longURL; 
   const shortURL = req.params.shortURL; 
-  urlDatabase[shortURL] = `http://${longURL}`; 
+  urlDatabase[shortURL].longURL = `http://${longURL}`; 
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls", (req, res) => {
-  let user = {}; 
+app.post("/urls", (req, res)=> {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
+  let user = {};
+  if(longURL.includes('http://')) {
+    user["longURL"] = `${longURL}`;
+
+  } else if (longURL.includes('https://')) {
+    user["longURL"] = `${longURL}`
+   
+  } else  {
+    user["longURL"] = `http://${longURL}`;
+  }
+  
   user["userID"] = req.session["id"];
+  urlDatabase[shortURL] = user;
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -115,10 +124,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.session["id"];
-  console.log(userID)
-  const username = req.body.username
+  const urls = urlsForUser(urlDatabase, userID);
   const user = userDatabase[userID];
-  const templateVars = { urls: urlDatabase, userDatabase, username, user };
+  const templateVars = { urls, user };
   res.render("urls_index", templateVars);
 });
 
@@ -140,16 +148,32 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]
+  const longURL = urlDatabase[shortURL]['longURL']
   res.redirect(`http://${longURL}`);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const userId = req.session["id"];
   const shortURL = req.params.shortURL;
-  const userID = req.session["id"];
-  const user = userDatabase[userID];
-  const templateVars = { urls: urlDatabase, userDatabase, shortURL, longURL, user };
+  const longURL = urlDatabase[shortURL].longURL;
+  
+  const templateVars = {
+    urls: urlDatabase,
+    userid: userDatabase[userId],
+    shortURL: req.params.shortURL,
+    longURL,
+    user: userId,
+  };
+
+  const urlBelongToUser =
+    urlDatabase[shortURL] && urlDatabase[shortURL].userID === userId;
+
+  if (!urlBelongToUser) {
+    res.render("urls_error_url", templateVars);
+  }
+  if (!userId) {
+    res.render("urls_error_login", templateVars);
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -184,4 +208,14 @@ const findUserByEmail = function (email, userDatabase) {
     }
   }
   return null;
+};
+
+const urlsForUser = function (urlDatabase, userID) {
+  let urlObject = {};
+  for (let url in urlDatabase) {
+    if (userID === urlDatabase[url].userID) {
+      urlObject[url] = urlDatabase[url];
+    }
+  }
+  return urlObject;
 };
