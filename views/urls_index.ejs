@@ -32,7 +32,7 @@
         <tbody>
           <% for(let url in urls) { %>
           <tr>
-            <td><a href= "<%= urls[url].longURL %>"><%= url %></td></a>
+            <td><a href= "<%= urls[url].longURL %> " target="_blank"><%= url %></td></a>
             <td><%= urls[url].longURL %></td>
             <td><a href="/urls/<%= url %>"><button class="btn btn-warning">Edit</button></a></td>
             <form method="POST" action="/urls/<%= url %>/delete">
