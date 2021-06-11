@@ -2,8 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-var morgan = require("morgan");
-var cookieSession = require("cookie-session");
+const morgan = require("morgan");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
 const { findUserByEmail } = require("./helpers");
 
@@ -38,37 +38,40 @@ const userDatabase = {
   },
 };
 
-////////////////POST
+////////////////POST ROUTS
 
 app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   const user = findUserByEmail(email, userDatabase);
-
+  //check if user is present in database by email
   if (!user) {
     return res.status(403).send("wrong credentials (email)!");
   }
+  //compare passwords
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("wrong password");
   }
-
   req.session["id"] = user.id;
   res.redirect(`/urls`);
 });
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  console.log('email', email)
-  console.log('userDatabase', userDatabase)
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
   let id = generateRandomString();
 
   if (findUserByEmail(email, userDatabase)) {
-    return res.status(401).send("We have found your email in the database, please Login");
-
+    return res
+      .status(401)
+      .send("We have found your email in the database, please Login");
   } else if (emptyFormRejection(email, password) === false) {
-    return res.status(401).send("wrong credentials, please make sure you've included a password to your registration.");
+    return res
+      .status(401)
+      .send(
+        "wrong credentials, please make sure you've included a password to your registration."
+      );
   }
 
   userDatabase[id] = { id, email, password: hashedPassword };
@@ -84,7 +87,7 @@ app.post("/urls/:shortURL", (req, res) => {
   } else {
     urlDatabase[shortURL].longURL = `http://${longURL}`;
   }
-  res.redirect(`/urls`);;
+  res.redirect(`/urls`);
 });
 
 app.post("/urls", (req, res) => {
@@ -111,32 +114,32 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  let id = req.session["email"];
   req.session = null;
   res.redirect(`/register`);
 });
 
 //////////////////GET
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
 app.get("/", function (req, res) {
   const userId = req.session["id"];
-  if(userId) {
-    return res.redirect("/urls")
+  if (userId) {
+    return res.redirect("/urls");
   }
   res.redirect("/login");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
 
 app.get("/urls", (req, res) => {
   const userID = req.session["id"];
   const urls = urlsForUser(urlDatabase, userID);
   const user = userDatabase[userID];
-  const templateVars = { urls, user };
+  const templateVars = { urls, user, urlDatabase };
 
-  if(!userID) {
-    return res.render("urls_error_login", templateVars)
+  if (!userID) {
+    return res.render("urls_error_login", templateVars);
   }
 
   res.render("urls_index", templateVars);
@@ -153,8 +156,8 @@ app.get("/urls/new", (req, res) => {
   const userId = req.session["id"];
   const user = userDatabase[userId];
   const templateVars = { urls: urlDatabase, user };
-  if(!userId) {
-    return res.render("login", templateVars)
+  if (!userId) {
+    return res.render("login", templateVars);
   }
 
   res.render("urls_new", templateVars);
@@ -162,11 +165,11 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]['longURL'];
-  
+  const longURL = urlDatabase[shortURL]["longURL"];
+
   if (longURL.includes("http://")) {
-   return res.redirect(`${longURL}`);
-}
+    return res.redirect(`${longURL}`);
+  }
   res.redirect(`http://${longURL}`);
 });
 
@@ -174,16 +177,17 @@ app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session["id"];
   const longURL = urlDatabase[req.params.shortURL].longURL;
   const shortURL = req.params.shortURL;
+  const user = userDatabase[userId];
   const templateVars = {
     urls: urlDatabase,
     userid: userDatabase[userId],
     shortURL: req.params.shortURL,
     longURL,
-    user: userId,
+    userId,
+    user,
   };
   const urlBelongToUser =
     urlDatabase[shortURL] && urlDatabase[shortURL].userID === userId;
-
   if (!urlBelongToUser) {
     return res.render("urls_error_url", templateVars);
   }
@@ -206,10 +210,10 @@ app.listen(PORT, () => {
 
 ///////////FUNCTIONS/////
 
-function generateRandomString() {
+const generateRandomString = function () {
   const randomString = Math.random().toString(36).substring(2, 8);
   return randomString;
-}
+};
 
 const emptyFormRejection = (email, password) => {
   if (!email || !password) {
