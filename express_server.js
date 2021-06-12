@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
-const { findUserByEmail } = require("./helpers");
+
 
 //middleware
 app.use(morgan("dev"));
@@ -38,7 +38,8 @@ const userDatabase = {
   },
 };
 
-////////////////POST ROUTS
+const { findUserByEmail, urlsForUser, emptyFormRejection, generateRandomString  } = require("./helpers");
+////////////////POST 
 
 app.post("/login", (req, res) => {
   let email = req.body.email;
@@ -66,7 +67,7 @@ app.post("/register", (req, res) => {
     return res
       .status(401)
       .send("We have found your email in the database, please Login");
-  } else if (emptyFormRejection(email, password) === false) {
+  } else if (!emptyFormRejection(email, password)) {
     return res
       .status(401)
       .send(
@@ -130,7 +131,6 @@ app.get("/", function (req, res) {
   }
   res.redirect("/login");
 });
-
 
 app.get("/urls", (req, res) => {
   const userID = req.session["id"];
@@ -208,25 +208,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-///////////FUNCTIONS/////
-
-const generateRandomString = function () {
-  const randomString = Math.random().toString(36).substring(2, 8);
-  return randomString;
-};
-
-const emptyFormRejection = (email, password) => {
-  if (!email || !password) {
-    return false;
-  }
-};
-
-const urlsForUser = function (urlDatabase, userID) {
-  let urlObject = {};
-  for (let url in urlDatabase) {
-    if (userID === urlDatabase[url].userID) {
-      urlObject[url] = urlDatabase[url];
-    }
-  }
-  return urlObject;
-};
