@@ -6,7 +6,6 @@ const morgan = require("morgan");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
 
-
 //middleware
 app.use(morgan("dev"));
 app.use(
@@ -38,11 +37,13 @@ const userDatabase = {
   },
 };
 
-const { findUserByEmail, 
-  urlsForUser, 
+const {
+  findUserByEmail,
+  urlsForUser,
   emptyFormRejection,
-  generateRandomString  } = require("./helpers");
-////////////////POST 
+  generateRandomString,
+} = require("./helpers");
+////////////////POST
 
 app.post("/login", (req, res) => {
   let email = req.body.email;
@@ -57,7 +58,7 @@ app.post("/login", (req, res) => {
   if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("wrong password");
   }
-  
+
   req.session["id"] = user.id;
   res.redirect(`/urls`);
 });
@@ -107,31 +108,40 @@ app.post("/urls", (req, res) => {
   } else {
     user["longURL"] = `http://${longURL}`;
   }
-  console.log(urlDatabase)
+  console.log(urlDatabase);
   user["userID"] = req.session["id"];
   urlDatabase[shortURL] = user;
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userId = req.session["id"];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   const shortURL = req.params.shortURL;
-  const userID = req.session["id"];
-  const urls = urlsForUser(urlDatabase, userID);
-  
-  if(!urls) {
-      return res.render("urls_error_url");
+  const user = userDatabase[userId];
+  const templateVars = {
+    urls: urlDatabase,
+    userid: userDatabase[userId],
+    shortURL: req.params.shortURL,
+    longURL,
+    userId,
+    user,
+  };
+  const urlBelongToUser =
+    urlDatabase[shortURL] && urlDatabase[shortURL].userID === userId;
+
+  if (!urlBelongToUser) {
+    return res.render("urls_error_url", templateVars);
   }
-  if(urls) {
+  if (urlBelongToUser) {
     delete urlDatabase[shortURL];
-    return res.redirect("/urls");
+    return res.redirect("/urls/");
   }
- 
- 
 });
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect(`/login`);
+  res.redirect(`/urls`);
 });
 
 //////////////////GET
@@ -165,7 +175,7 @@ app.get("/register", (req, res) => {
   const user = userDatabase[userID];
   const templateVars = { urls: urlDatabase, user, urlDatabase };
   if (userID) {
-    return res.redirect("/urls")
+    return res.redirect("/urls");
   }
   return res.render("urls_register", templateVars);
 });
@@ -175,13 +185,20 @@ app.get("/urls/new", (req, res) => {
   const user = userDatabase[userId];
   const templateVars = { urls: urlDatabase, user };
   if (!userId) {
-    return res.render("login", templateVars);
+    return res.redirect("/login");
   }
   return res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+
+  if (!urlDatabase[req.params.shortURL]) {
+    return res
+      .status(401)
+      .send("We do not have a record of this short URL in our database.");
+  }
+
   const longURL = urlDatabase[shortURL]["longURL"];
 
   if (longURL.includes("http://")) {
@@ -191,9 +208,16 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+
+  if (!urlDatabase[req.params.shortURL]) {
+    return res
+      .status(401)
+      .send("We do not have a record of this short URL in our database.");
+  }
+
   const userId = req.session["id"];
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  const shortURL = req.params.shortURL;
   const user = userDatabase[userId];
   const templateVars = {
     urls: urlDatabase,
@@ -220,15 +244,13 @@ app.get("/login", (req, res) => {
   const user = userDatabase[userID];
   const templateVars = { urls: urlDatabase, user, urlDatabase };
 
-  if(!userID) {
-    return res.render("login", templateVars)
+  if (!userID) {
+    return res.render("login", templateVars);
   }
- 
+
   res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
