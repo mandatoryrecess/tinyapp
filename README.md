@@ -4,9 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Login Page"](https://github.com/mandatoryrecess/tinyapp/blob/master/docs/LoginPage.png)
-!['urls Page'](https://github.com/mandatoryrecess/tinyapp/blob/master/docs/myURLs.png)
-!["urls/new page"](https://github.com/mandatoryrecess/tinyapp/blob/master/docs/createTinyUrl.png)
+!["Login Page"](https://github.com/mandatoryrecess/tinyapp/blob/2430728e2c15fe795f0120d5b9fb9175b53c66ce/docs/LoginPage.png)
+!['Create Urls'](https://github.com/mandatoryrecess/tinyapp/blob/2430728e2c15fe795f0120d5b9fb9175b53c66ce/docs/createUrls.png)
+!["urls/new page"](https://github.com/mandatoryrecess/tinyapp/blob/2430728e2c15fe795f0120d5b9fb9175b53c66ce/docs/urls.png)
 
 ## Dependencies
 
