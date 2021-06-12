@@ -148,7 +148,10 @@ app.get("/urls", (req, res) => {
 app.get("/register", (req, res) => {
   const userId = req.session["id"];
   const user = userDatabase[userId];
-  const templateVars = { urls: urlDatabase, user };
+  const templateVars = { urls: urlDatabase, user, urlDatabase };
+  if (userId) {
+    return res.render("urls_index", templateVars)
+  }
   res.render("urls_register", templateVars);
 });
 
