@@ -187,7 +187,10 @@ app.get("/urls/new", (req, res) => {
   if (!userId) {
     return res.redirect("/login");
   }
-  return res.render("urls_new", templateVars);
+  if(userId) {
+    return res.render("urls_new", templateVars);
+  }
+  
 });
 
 app.get("/u/:shortURL", (req, res) => {
